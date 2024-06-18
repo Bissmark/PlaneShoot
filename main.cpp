@@ -106,13 +106,67 @@ int main()
 		}
 	};
 
+	class Enemy {
+	public:
+		Vector2 position;
+		float speed;
+		Color color;
+
+		Enemy() 
+		{
+			position = { (screenWidth / 2.0f) - 25, 0 };
+			speed = 1;
+			color = RED;
+		}
+
+		Enemy(Vector2 pos, float spd, Color col) 
+		{
+			position = pos;
+			speed = spd;
+			color = col;
+		}
+
+		void Move() 
+		{
+			position.y += speed;
+		}
+
+		void Draw() 
+		{
+			DrawRectangle(position.x, position.y, 50, 50, color);
+		};
+
+		void Destroy() 
+		{
+			position = { (screenWidth / 2.0f) - 25, 0 };
+		}
+
+		void OnCollision(std::vector<Bullet>& bullets)
+		{
+			for (int i = 0; i < bullets.size(); i++)
+			{
+				if (CheckCollisionRecs({ position.x, position.y, 50, 50 }, { bullets[i].position.x, bullets[i].position.y, 10, 10 }))
+				{
+					Destroy();
+					bullets.erase(bullets.begin() + i); // Remove the bullet that hit the enemy
+					break; // Exit the loop since the bullet is removed
+				}
+			}
+		}
+	};
+
 	Player player;
+	Enemy enemy;
 	// Main game loop
 	while (!WindowShouldClose())    // Detect window close button or ESC key
 	{
 		player.Draw();
 		player.Move();
 		player.FireBullet();
+
+		enemy.Draw();
+		enemy.Move();
+		enemy.OnCollision(player.bullets);
 
 		// Update
 
